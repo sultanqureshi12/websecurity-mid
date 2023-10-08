@@ -54,36 +54,55 @@ register_nav_menus(
 add_action('wp_ajax_send_message_form', 'handle_message_form');
 add_action('wp_ajax_nopriv_send_message_form', 'handle_message_form');
 
-function handle_message_form(){
-
-    if(
-    ! isset($_POST['smf-nonce'])||
-    !wp_verify_nonce($_POST['smf-nonce'],'send_message_form')
-    ){
-        wp_send_json_error([
-         'message' => 'something fishy going on'
-        ]);
-    }
-
-    $data =[];
-
-    $data['username']=sanitize_user($_POST['username']);
-
-    $data['email']= sanitize_user($POST['email']);
-
-    $data['message']= sanitize_user($POST['message']);
-
-    wp_send_json_success([$_POST, $data]);
-}
 
 function mytheme_enqueue_scripts() {
 
+
+
     // Pass variables to script.js
-    wp_localize_script('my-theme-script', 'ajax_object', array(
-        'ajax_url' => admin_url('admin-ajax.php'),
+    wp_localize_script('formscript', 'ajax_object', array(
+        'url' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('send_message_form_nonce')
     ));
 }
+
+function handle_message_form(){
+
+    // if(
+    // !isset($_POST['smf-nonce'])||
+    // !wp_verify_nonce($_POST['smf-nonce'],'send_message_form')
+    // ){
+    //     wp_send_json_error([
+    //      'message' => 'something fishy going on'
+    //     ]);
+    // }
+
+    // $data =[];
+
+    // $data['username']=sanitize_user($_POST['username']);
+
+    // $data['email']= sanitize_user($_POST['email']);
+
+    // $data['message']= sanitize_user($_POST['message']);
+
+    $username = sanitize_text_field($_POST['username']);
+    $email = sanitize_text_field($_POST['email']);
+    $msg = sanitize_text_field($_POST['msg']);
+
+    $response = array(
+       'message'=>$msg,
+       'username'=>$username,
+       'email'=>$email,
+    );
+
+
+
+    wp_send_json_success($response);
+
+
+}
+
+
 
 add_action('wp_enqueue_scripts', 'mytheme_enqueue_scripts');
 
